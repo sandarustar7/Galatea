@@ -1,0 +1,11 @@
+{
+    "nani" : {
+        "Keyword": "nani",
+        "Response": "insert text here"  
+    },
+    
+    "pneuma" : {
+        "Keyword": "pneuma",
+        "Response": "Coffee with Milk????"
+    }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "galatea-discord-bot",
+  "version": "0.0.1",
+  "description": "A discord bot made by combatperson7 for custom use and purposes",
+  "main": "lumina.js",
+  "dependencies": {
+    "bufferutil": "^4.0.1",
+    "discord.js": "^11.5.1",
+    "express": "^4.17.1",
+    "fast-levenshtein": "^2.0.6",
+    "ffmpeg": "0.0.4",
+    "handlebars": "^4.2.0",
+    "libsodium-wrappers": "^0.7.5",
+    "opusscript": "^0.0.7",
+    "passport": "^0.4.0",
+    "request": "^2.88.0",
+    "twitch-api-v5": "^2.0.4",
+    "uws": "^100.0.1",
+    "youtube-audio-stream": "^0.3.1",
+    "ytdl-core": "^0.29.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "combatperson7/Sandaru Fernando",
+  "license": "MIT"
+}
