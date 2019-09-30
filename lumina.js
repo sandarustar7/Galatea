@@ -73,7 +73,7 @@ client.on("message", (message) => {
         .then(connection => {
             message.channel.send("Joined successfully!");
             setTimeout(function() {
-                message.member.voiceChannel.disconnect();
+                connection.disconnect();
                 message.channel.send("Left successfully!");
             },5000)
         });
@@ -84,9 +84,15 @@ client.on("message", (message) => {
         message.member.voiceChannel.join()
         .then(connection => {
             message.channel.send("Joined Successfully!")
-            connection.playFile("E:\3xperimental\Discord\Galatea\test.mp3");
+            connection.playFile("E:\3xperimental\Discord\Galatea\test.mp3")
+            .then(connection.disconnect());
+            message.channel.send("Left successfully!");
         })
         .catch(console.error);
+    }
+
+    if (message.content.startsWith(prefix + "toConsole")) {
+        console.log(message.content);
     }
     
     //User Id 
