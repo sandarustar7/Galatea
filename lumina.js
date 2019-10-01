@@ -82,7 +82,7 @@ client.on("message", (message) => {
     //VC File playing test command
     //Use Forward Slashes
     if (message.content.startsWith(prefix + "VC Play Test")) {
-        if (message.member.voiceChannel != null && MessageEvent.member.voiceChannel != undefined) {
+        if (message.member.voiceChannel != null && message.member.voiceChannel != undefined) {
             message.member.voiceChannel.join()
             .then(connection => {
                 message.channel.send("Joined Successfully!");
@@ -206,6 +206,10 @@ client.on("message", (message) => {
         message.channel.send ("<@617473101852180488> SHTAAAAALP PLZZZZZ ");
     }
 
+    if (message.content === prefix + "err") {
+        throw new Error;
+    }
+
     //Shutdown command
     if(message.content === "shutdown" && message.author.id == '282571468393414667')
     client.channels.get('619406405685870593').send('Going offline...')
@@ -279,3 +283,9 @@ client.login(clientSecret.secret);
 function asyncTimeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+process.on('uncaughtException', function (err) {
+    client.destroy();
+    console.log("Client destroyed successfully");
+    throw err;
+  })
