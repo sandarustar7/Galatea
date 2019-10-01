@@ -80,15 +80,28 @@ client.on("message", (message) => {
     }
 
     //VC File playing test command
+    //Use Forward Slashes
     if (message.content.startsWith(prefix + "VC Play Test")) {
-        message.member.voiceChannel.join()
-        .then(connection => {
-            message.channel.send("Joined Successfully!")
-            connection.playFile("E:\3xperimental\Discord\Galatea\test.mp3")
-            .then(connection.disconnect());
-            message.channel.send("Left successfully!");
+        if (message.member.voiceChannel != null && MessageEvent.member.voiceChannel != undefined) {
+            message.member.voiceChannel.join()
+            .then(connection => {
+                message.channel.send("Joined Successfully!");
+                const dispatcher = connection.playFile("E:/3xperimental/Discord/Galatea/test.mp3");
+                dispatcher.on("start", value => {
+                    console.log("started playing in theory");
+                    console.log(value);
+                });
+                dispatcher.on("end", value => {
+                    console.log("ended playback");
+                    console.log(value);
+                    connection.disconnect();
+            })
         })
         .catch(console.error);
+        } else {
+            message.channel.send("Could not find voice channel: You may have not joined a voice channel")
+        }
+        
     }
 
     if (message.content.startsWith(prefix + "toConsole")) {
