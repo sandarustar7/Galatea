@@ -47,7 +47,7 @@ client.on("ready", () => {
 
 //VERY LARGE Message Processing Function
 client.on("message", (message) => {
-    console.time("Message processing");
+    console.time("Message Processing");
     if (message.author.bot) return;
     var messageFlag = false;
     //if (!message.content.startsWith(prefix)) return;
@@ -217,8 +217,8 @@ client.on("message", (message) => {
     //Shutdown command
     if(message.content === "shutdown" && message.author.id == '282571468393414667')
     messageFlag = true;
-    console.timeEnd();
-    console.timeLog();
+    console.timeEnd("Message Processing");
+    console.timeLog("Message Processing");
     client.channels.get('619406405685870593').send('Going offline...')
         .then(value => client.destroy()
             .then(value2 => {
@@ -265,8 +265,8 @@ client.on("message", (message) => {
             if (e !== BreakException) throw e;
         }
     }
-    console.timeEnd();
-    console.timeLog();
+    console.timeEnd("Message Processing");
+    console.timeLog("Message Processing");
 });
 
 decToBi = function(n) {
@@ -288,6 +288,7 @@ function asyncTimeout(ms) {
 
 process.on('uncaughtException', function (err) {
     client.destroy();
-    console.log("Client destroyed successfully");
+    console.error(err);
+    console.log("uncaughtException: Client destroyed successfully");
     throw err;
   })
