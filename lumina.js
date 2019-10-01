@@ -67,6 +67,34 @@ client.on("message", (message) => {
             "\nBinary: " + deconSnowflake.binary );
     }
 
+    //VC testing command
+    if(message.content.startsWith(prefix + "VC Join Test")) {
+        message.member.voiceChannel.join()
+        .then(connection => {
+            message.channel.send("Joined successfully!");
+            setTimeout(function() {
+                connection.disconnect();
+                message.channel.send("Left successfully!");
+            },5000)
+        });
+    }
+
+    //VC File playing test command
+    if (message.content.startsWith(prefix + "VC Play Test")) {
+        message.member.voiceChannel.join()
+        .then(connection => {
+            message.channel.send("Joined Successfully!")
+            connection.playFile("E:\3xperimental\Discord\Galatea\test.mp3")
+            .then(connection.disconnect());
+            message.channel.send("Left successfully!");
+        })
+        .catch(console.error);
+    }
+
+    if (message.content.startsWith(prefix + "toConsole")) {
+        console.log(message.content);
+    }
+    
     //User Id 
     if (message.content.startsWith("!id")) 
     {
@@ -234,3 +262,7 @@ discordToUNIX = function(n) {
 }
 
 client.login(clientSecret.secret);
+
+function asyncTimeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
