@@ -47,16 +47,20 @@ client.on("ready", () => {
 
 //VERY LARGE Message Processing Function
 client.on("message", (message) => {
+    console.time("Message processing");
     if (message.author.bot) return;
+    var messageFlag = false;
     //if (!message.content.startsWith(prefix)) return;
 
     //Who are You
     if (message.content.startsWith("!whoareyou"))
+    messageFlag = true;
     message.channel.send(client.user.id);
 
     //Snowflake Decode
     if (message.content.startsWith(prefix + "snowflake_decode"))
     {
+        messageFlag = true;
         var stringArr = message.content.split(" ");
         var deconSnowflake = SnowflakeUtil.deconstruct(stringArr[1]);
         message.channel.send("Timestamp (UNIX?):" + deconSnowflake.timestamp +
@@ -69,6 +73,7 @@ client.on("message", (message) => {
 
     //VC testing command
     if(message.content.startsWith(prefix + "VC Join Test")) {
+        messageFlag = true;
         message.member.voiceChannel.join()
         .then(connection => {
             message.channel.send("Joined successfully!");
@@ -82,6 +87,7 @@ client.on("message", (message) => {
     //VC File playing test command
     //Use Forward Slashes
     if (message.content.startsWith(prefix + "VC Play Test")) {
+        messageFlag = true;
         if (message.member.voiceChannel != null && message.member.voiceChannel != undefined) {
             message.member.voiceChannel.join()
             .then(connection => {
@@ -105,12 +111,13 @@ client.on("message", (message) => {
     }
 
     if (message.content.startsWith(prefix + "toConsole")) {
+        messageFlag = true;
         console.log(message.content);
     }
     
     //User Id 
-    if (message.content.startsWith("!id")) 
-    {
+    if (message.content.startsWith("!id")) {
+        messageFlag = true;
         for (var [key, value] of message.mentions.users) 
         {
             var deconSnowflake = SnowflakeUtil.deconstruct(key);
@@ -132,29 +139,25 @@ client.on("message", (message) => {
     //Discord doesn't allow bots to look at user profiles WHYYYYY
 
     //Who am I
-    if (message.content.startsWith("!whoami"))
-    {
+    if (message.content.startsWith("!whoami")) {
+        messageFlag = true;
         console.log(message.author.id)
         message.channel.send(message.author.id);
     }
 
     //Ping-pong
     if (message.content.startsWith("ping")) {
+        messageFlag = true;
         message.channel.send("pong!");
         console.log(message.channel.id);
     }
 
-    //Test
-    if(message.content.startsWith("test"))
-    console.log(keywordArr);
-
     //Add keywords
     //Ideal syntax: !AddResponse Keyword Response
     //Rethink sterilization: eval function?
-    if(message.content.toLowerCase().startsWith((prefix + "addresponse")))
-    {
-        try 
-        {
+    if(message.content.toLowerCase().startsWith((prefix + "addresponse"))) {
+        messageFlag = true;
+        try {
             var stringArr = message.content.split(" ");
             var duplicate = false;
             var prefixCheck = false;
@@ -201,17 +204,21 @@ client.on("message", (message) => {
     }
 
     //Reply to Xinxin's bot
-    if (message.content === "https://www.youtube.com/watch?v=vxKBHX9Datw" && message.author.id == "617473101852180488")
-    {
+    if (message.content === "https://www.youtube.com/watch?v=vxKBHX9Datw" && message.author.id == "617473101852180488") {
+        messageFlag = true;
         message.channel.send ("<@617473101852180488> SHTAAAAALP PLZZZZZ ");
     }
 
     if (message.content === prefix + "err") {
+        messageFlag = true;
         throw new Error;
     }
 
     //Shutdown command
     if(message.content === "shutdown" && message.author.id == '282571468393414667')
+    messageFlag = true;
+    console.timeEnd();
+    console.timeLog();
     client.channels.get('619406405685870593').send('Going offline...')
         .then(value => client.destroy()
             .then(value2 => {
@@ -220,52 +227,47 @@ client.on("message", (message) => {
     );
 
     //Return keywords (should be last always!)
-    var BreakException = {};
-    var resultArr = [];
-    var distanceArr = [];
-    try
-    {
-        keywordArr.forEach(element => {
-            if (message.content.startsWith('!' + element) && !message.author.bot)
-            {
-                //console.log(keywordJSON[element].Response);
-                resultArr.push(element);
-                //message.channel.send(keywordJSON[element].Response);
-            }
-        });
-
-        if (resultArr.length == 1)
+    if (!messageFlag) {
+        var BreakException = {};
+        var resultArr = [];
+        var distanceArr = [];
+        try
         {
-            console.log(keywordJSON[resultArr[0]].Response);
-            message.channel.send(keywordJSON[resultArr[0]].Response);
-        }
-
-        else if (resultArr.length > 1)
-        {
-            for (var i=0; i < resultArr.length; i++)
-            {
-                distanceArr[i] = leven.get(message.content, resultArr[i])
-            }
-
-            var lowestIndex = 0;
-            for (var i=0; i< distanceArr.length; i++)
-            {
-                if (distanceArr[i] < lowestIndex)
-                {
-                    lowestIndex = i;
+            keywordArr.forEach(element => {
+                if (message.content.startsWith('!' + element) && !message.author.bot) {
+                    //console.log(keywordJSON[element].Response);
+                    resultArr.push(element);
+                    //message.channel.send(keywordJSON[element].Response);
                 }
+            });
+
+            if (resultArr.length == 1) {
+                console.log(keywordJSON[resultArr[0]].Response);
+                message.channel.send(keywordJSON[resultArr[0]].Response);
             }
-            
-            console.log(keywordJSON[resultArr[lowestIndex]].Response);
-            message.channel.send(keywordJSON[resultArr[lowestIndex]].Response);
+
+            else if (resultArr.length > 1) {
+                for (var i=0; i < resultArr.length; i++) {
+                    distanceArr[i] = leven.get(message.content, resultArr[i])
+                }
+
+                var lowestIndex = 0;
+                for (var i=0; i< distanceArr.length; i++) {
+                    if (distanceArr[i] < lowestIndex) {
+                        lowestIndex = i;
+                    }
+                }
+                console.log(keywordJSON[resultArr[lowestIndex]].Response);
+                message.channel.send(keywordJSON[resultArr[lowestIndex]].Response);
+            }
+        }
+        catch (e) {
+            if (e !== BreakException) throw e;
         }
     }
-    catch (e) {
-        if (e !== BreakException) throw e;
-    }
-
-
-})
+    console.timeEnd();
+    console.timeLog();
+});
 
 decToBi = function(n) {
     var binary = parseInt(n, 10);
