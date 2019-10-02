@@ -47,19 +47,24 @@ client.on("ready", () => {
 
 //VERY LARGE Message Processing Function
 client.on("message", (message) => {
-    console.time("Message Processing");
+    console.time("message");
     if (message.author.bot) return;
     var messageFlag = false;
+    var finished = false;
     //if (!message.content.startsWith(prefix)) return;
 
     //Who are You
-    if (message.content.startsWith("!whoareyou"))
-    messageFlag = true;
-    message.channel.send(client.user.id);
+    if (message.content.startsWith("!whoareyou")) {
+        console.log("who are you");
+        messageFlag = true;
+        message.channel.send(client.user.id);
+        finished = true;
+    }
 
     //Snowflake Decode
     if (message.content.startsWith(prefix + "snowflake_decode"))
     {
+        console.log("snowflake decode");
         messageFlag = true;
         var stringArr = message.content.split(" ");
         var deconSnowflake = SnowflakeUtil.deconstruct(stringArr[1]);
@@ -69,10 +74,12 @@ client.on("message", (message) => {
             "\nProcess ID:" + deconSnowflake.processID + 
             "\nIncrement:" + deconSnowflake.increment + 
             "\nBinary: " + deconSnowflake.binary );
+            finished = true;
     }
 
     //VC testing command
     if(message.content.startsWith(prefix + "VC Join Test")) {
+        console.log("VC Join Test");
         messageFlag = true;
         message.member.voiceChannel.join()
         .then(connection => {
@@ -82,11 +89,13 @@ client.on("message", (message) => {
                 message.channel.send("Left successfully!");
             },5000)
         });
+        finished = true;
     }
 
     //VC File playing test command
     //Use Forward Slashes
     if (message.content.startsWith(prefix + "VC Play Test")) {
+        console.log("VC File test");
         messageFlag = true;
         if (message.member.voiceChannel != null && message.member.voiceChannel != undefined) {
             message.member.voiceChannel.join()
@@ -101,22 +110,26 @@ client.on("message", (message) => {
                     console.log("ended playback");
                     console.log(value);
                     connection.disconnect();
+                    finished = true;
             })
         })
         .catch(console.error);
         } else {
             message.channel.send("Could not find voice channel: You may have not joined a voice channel")
+            finished = true;
         }
-        
     }
 
     if (message.content.startsWith(prefix + "toConsole")) {
+        console.log("toConsole");
         messageFlag = true;
         console.log(message.content);
+        finished = true;
     }
     
     //User Id 
     if (message.content.startsWith("!id")) {
+        console.log("User ID")
         messageFlag = true;
         for (var [key, value] of message.mentions.users) 
         {
@@ -127,6 +140,7 @@ client.on("message", (message) => {
             "\nDate joined: " + deconSnowflake.date +
             "\nIs a bot: " + value.bot);
         }
+        finished = true;
     }
 
     /*if (message.content.startsWith("!connections"))
@@ -140,15 +154,21 @@ client.on("message", (message) => {
 
     //Who am I
     if (message.content.startsWith("!whoami")) {
+        console.log("Who am I");
         messageFlag = true;
-        console.log(message.author.id)
-        message.channel.send(message.author.id);
+        console.log(message.author.id);
+        message.channel.send(message.author.id).then(unused => {
+            finished = true;
+        });
     }
 
     //Ping-pong
     if (message.content.startsWith("ping")) {
+        console.log("Ping-pong");
         messageFlag = true;
-        message.channel.send("pong!");
+        message.channel.send("pong!").then(unused => {
+            finished = true;
+        });
         console.log(message.channel.id);
     }
 
@@ -156,6 +176,7 @@ client.on("message", (message) => {
     //Ideal syntax: !AddResponse Keyword Response
     //Rethink sterilization: eval function?
     if(message.content.toLowerCase().startsWith((prefix + "addresponse"))) {
+        console.log("addResponse");
         messageFlag = true;
         try {
             var stringArr = message.content.split(" ");
@@ -176,16 +197,19 @@ client.on("message", (message) => {
             {
                 duplicate=true;
                 console.log("Duplicate detected!");
-                message.channel.send("Cannot add response: Keyword is already a command");
+                message.channel.send("Cannot add response: Keyword is already a command").then(unused => {
+                    finished = true;
+                });
             }
-
         });
 
         if (!duplicate && !prefixCheck)
         {
             keywordJSON[keyword] =  {'Response': response }
             keywordArr.push(keyword.toString());
-            message.channel.send("Added Response!");
+            message.channel.send("Added Response!").then(unused => {
+                finished = true;
+            });
         }
 
         console.log(keywordJSON);
@@ -197,7 +221,9 @@ client.on("message", (message) => {
             if (error == TypeError )
             {
                 console.log(error);
-                message.channel.send("Cannot add response: There might have been a syntax error");
+                message.channel.send("Cannot add response: There might have been a syntax error").then(unused => {
+                    finished = true;
+                });
             }
         }
         
@@ -205,29 +231,37 @@ client.on("message", (message) => {
 
     //Reply to Xinxin's bot
     if (message.content === "https://www.youtube.com/watch?v=vxKBHX9Datw" && message.author.id == "617473101852180488") {
+        console.log("Reply to Xinxin's bot");
         messageFlag = true;
-        message.channel.send ("<@617473101852180488> SHTAAAAALP PLZZZZZ ");
+        message.channel.send ("<@617473101852180488> SHTAAAAALP PLZZZZZ ").then(unused => {
+            finished = true;
+        });
     }
 
     if (message.content === prefix + "err") {
+        console.log("error throwing");
         messageFlag = true;
-        throw new Error;
+        finished = true;
+        throw new Error;       
     }
 
     //Shutdown command
-    if(message.content === "shutdown" && message.author.id == '282571468393414667')
-    messageFlag = true;
-    console.timeEnd("Message Processing");
-    console.timeLog("Message Processing");
-    client.channels.get('619406405685870593').send('Going offline...')
-        .then(value => client.destroy()
-            .then(value2 => {
-        process.exit();
+    if(message.content === "shutdown" && message.author.id == '282571468393414667') {
+        console.log("Shutdown");
+        console.timeEnd("message");
+        console.timeLog("message");
+        client.channels.get('619406405685870593').send('Going offline...')
+        .then(value => 
+            client.destroy()
+        .then(value2 => {
+            process.exit();
         })
-    );
+        );
+    }
 
     //Return keywords (should be last always!)
     if (!messageFlag) {
+        console.log("Keyword Response");
         var BreakException = {};
         var resultArr = [];
         var distanceArr = [];
@@ -243,7 +277,9 @@ client.on("message", (message) => {
 
             if (resultArr.length == 1) {
                 console.log(keywordJSON[resultArr[0]].Response);
-                message.channel.send(keywordJSON[resultArr[0]].Response);
+                message.channel.send(keywordJSON[resultArr[0]].Response).then(unused => {
+                    finished = true;
+                });
             }
 
             else if (resultArr.length > 1) {
@@ -258,15 +294,20 @@ client.on("message", (message) => {
                     }
                 }
                 console.log(keywordJSON[resultArr[lowestIndex]].Response);
-                message.channel.send(keywordJSON[resultArr[lowestIndex]].Response);
+                message.channel.send(keywordJSON[resultArr[lowestIndex]].Response).then(unused => 
+                    finished = true);
             }
         }
         catch (e) {
             if (e !== BreakException) throw e;
+            finished = true;
         }
     }
-    console.timeEnd("Message Processing");
-    console.timeLog("Message Processing");
+    if (finished) {
+        console.timeLog("message");
+        console.timeEnd("message");
+    }
+    
 });
 
 decToBi = function(n) {
