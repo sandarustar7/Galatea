@@ -8,6 +8,7 @@ const fs = require('fs');
 const client = new Discord.Client();
 const UNIXOffset = 1420070400000;
 const youtubeStream = require('youtube-audio-stream');
+const forever = require("forever-monitor");
 //const api = require('twitch-api-v5');
 const clientActivity = {
     'name' : ' with the universe',
@@ -53,6 +54,29 @@ client.on("message", (message) => {
     var finished = false;
     //if (!message.content.startsWith(prefix)) return;
 
+    if (message.content.startsWith(prefix + "help")) {
+        console.log("help");
+        message.channel.send("Sending docs, check your DM's").then(unused => {
+            message.author.createDM().then(channel => {
+                channel.send("A bot by combatperson#4343."
+                + "\nDocumentation is not necessarily up to date"
+                + "\nThis bot is very much in development, is not necessarily secure or functional lol"
+                + "\n!help: This command lol"
+                + "\n!whoareyou: prints this bot's snowflake id"
+                + "\n!snowflake_decode: deconstructs the provided snowflake into it's inherent fields"
+                + "\n!VC Join Test: joins the user's voice channelf for 5 seconds for testing purposes"
+                + "\n!VC Play Test: uses a ffmpeg stream to play a file (on server) back."
+                + "\n!toConsole: logs a message's content to the console. Useful for finding emoji/user/channel ids"
+                + "\n!id: responds with the id's of tagged users"
+                + "\n!whoami: responds with message author's id"
+                + "\n!ping: responds with pong"
+                + "\n!err: throws error"
+                + "\n!addresponse: adds the first parameter as a keyword, adds the second parameter as a response (because I'm lazy and used string.split(\" \"), only one word per response and keyword can be used"
+                + "\n![keyword]: returns the response parameter");
+            });
+        
+        });
+    }
     //Who are You
     if (message.content.startsWith("!whoareyou")) {
         console.log("who are you");
