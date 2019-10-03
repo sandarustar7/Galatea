@@ -48,25 +48,31 @@ client.on("ready", () => {
 
 //VERY LARGE Message Processing Function
 client.on("message", (message) => {
-    //var event = new Event('messageSend');
-    console.time("message");
+    const time = process.hrtime();
+    console.log("______NEW MESSAGE_______");
+    var diff;
     if (message.author.bot) return;
 
     const defaultCommands = new Promise(function(resolve, reject) {
         if (help(message) || whoareyou(message) || snowflakeDecode(message) || vcJoinTest(message) || vcPlayTest(message) || toConsole(message)
         || id(message) || whoami(message) || ping (message) || err(message) || addResponse(message) || replytoXinxinsBot(message) || shutdown(message)) {
-            console.log("promise resolved");
-            resolve();
+            resolve("promise resolved");
         } else {
-            console.log("promise rejected");
-            reject();
+            reject("promise rejected");
         }
         
     });
 
-    defaultCommands.then(console.timeEnd("message"))
-    .catch(keywordResponse(message)).then(console.timeEnd("message"));
-    
+    defaultCommands.then(value => {
+        console.log(value);
+        return true;
+    })
+    .catch(value => {
+        console.log(value);
+        keywordResponse(message);
+    })
+    .finally(diff = process.hrtime(time));
+    console.log(diff[1]/1000000 + "ms");
 });
 
 function help (message) {
@@ -294,8 +300,6 @@ function shutdown(message) {
     //Shutdown command
     if(message.content === "shutdown" && message.author.id == '282571468393414667') {
         console.log("Shutdown");
-        console.timeEnd("message");
-        console.timeLog("message");
         client.channels.get('619406405685870593').send('Going offline...')
         .then(value => 
             client.destroy()
@@ -361,9 +365,9 @@ function asyncTimeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-process.on('uncaughtException', function (err) {
+/*process.on('uncaughtException', function (err) {
     client.destroy();
     console.error(err);
     console.log("uncaughtException: Client destroyed successfully");
     throw err;
-  })
+  })*/
