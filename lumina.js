@@ -51,16 +51,25 @@ client.on("message", (message) => {
     //var event = new Event('messageSend');
     console.time("message");
     if (message.author.bot) return;
-    var messageFlag = false;
-    var finished = false;
+
     const defaultCommands = new Promise(function(resolve, reject) {
-        if (message.content.startsWith(prefix + "help")) {
-            help();
+        if (help(message) || whoareyou(message) || snowflakeDecode(message) || vcJoinTest(message) || vcPlayTest(message) || toConsole(message)
+        || id(message) || whoami(message) || ping (message) || err(message) || addResponse(message) || replytoXinxinsBot(message) || shutdown(message)) {
+            console.log("promise resolved");
+            resolve();
+        } else {
+            console.log("promise rejected");
+            reject();
         }
         
-    })
-    //if (!message.content.startsWith(prefix)) return;
+    });
 
+    defaultCommands.then(console.timeEnd("message"))
+    .catch(keywordResponse(message)).then(console.timeEnd("message"));
+    
+});
+
+function help (message) {
     if (message.content.startsWith(prefix + "help")) {
         console.log("help");
         message.channel.send("Sending docs, check your DM's").then(unused => {
@@ -82,20 +91,22 @@ client.on("message", (message) => {
                 + "\n![keyword]: returns the response parameter");
             });
         });
+        return true;
     }
+    else return false;
+}
+
+function whoareyou(message) {
     //Who are You
     if (message.content.startsWith("!whoareyou")) {
         console.log("who are you");
-        messageFlag = true;
         message.channel.send(client.user.id);
-        finished = true;
     }
+}
 
-    //Snowflake Decode
-    if (message.content.startsWith(prefix + "snowflake_decode"))
-    {
+function snowflakeDecode(message) {
+    if (message.content.startsWith(prefix + "snowflake_decode")) {
         console.log("snowflake decode");
-        messageFlag = true;
         var stringArr = message.content.split(" ");
         var deconSnowflake = SnowflakeUtil.deconstruct(stringArr[1]);
         message.channel.send("Timestamp (UNIX?):" + deconSnowflake.timestamp +
@@ -104,13 +115,15 @@ client.on("message", (message) => {
             "\nProcess ID:" + deconSnowflake.processID + 
             "\nIncrement:" + deconSnowflake.increment + 
             "\nBinary: " + deconSnowflake.binary );
-            finished = true;
+        return true;
     }
+    else return false;
+}
 
-    //VC testing command
-    if(message.content.startsWith(prefix + "VC Join Test")) {
+function vcJoinTest(message) {
+     //VC testing command
+     if(message.content.startsWith(prefix + "VC Join Test")) {
         console.log("VC Join Test");
-        messageFlag = true;
         message.member.voiceChannel.join()
         .then(connection => {
             message.channel.send("Joined successfully!");
@@ -119,14 +132,16 @@ client.on("message", (message) => {
                 message.channel.send("Left successfully!");
             },5000)
         });
-        finished = true;
+        return true;
     }
+    else return false;
+}
 
+function vcPlayTest(message) {
     //VC File playing test command
     //Use Forward Slashes
     if (message.content.startsWith(prefix + "VC Play Test")) {
         console.log("VC File test");
-        messageFlag = true;
         if (message.member.voiceChannel != null && message.member.voiceChannel != undefined) {
             message.member.voiceChannel.join()
             .then(connection => {
@@ -140,27 +155,30 @@ client.on("message", (message) => {
                     console.log("ended playback");
                     console.log(value);
                     connection.disconnect();
-                    finished = true;
             })
         })
         .catch(console.error);
         } else {
             message.channel.send("Could not find voice channel: You may have not joined a voice channel")
-            finished = true;
         }
+        return true;
     }
+    else return false;
+}
 
+function toConsole(message) {
     if (message.content.startsWith(prefix + "toConsole")) {
         console.log("toConsole");
-        messageFlag = true;
         console.log(message.content);
-        finished = true;
+        return true;
     }
-    
+    else return false;
+}
+
+function id(message) {
     //User Id 
     if (message.content.startsWith("!id")) {
         console.log("User ID")
-        messageFlag = true;
         for (var [key, value] of message.mentions.users) 
         {
             var deconSnowflake = SnowflakeUtil.deconstruct(key);
@@ -170,44 +188,51 @@ client.on("message", (message) => {
             "\nDate joined: " + deconSnowflake.date +
             "\nIs a bot: " + value.bot);
         }
-        finished = true;
+        return true;
     }
+    else return false;
+}
 
-    /*if (message.content.startsWith("!connections"))
-    {
-        for (var [key, value] of message.mentions.users)
-        {
-
-        }
-    }*/
-    //Discord doesn't allow bots to look at user profiles WHYYYYY
-
-    //Who am I
+function whoami(message) {
     if (message.content.startsWith("!whoami")) {
         console.log("Who am I");
-        messageFlag = true;
         console.log(message.author.id);
-        message.channel.send(message.author.id).then(unused => {
-            finished = true;
-        });
+        message.channel.send(message.author.id);
+        return true;
     }
+    else return false;
+}
 
+function ping(message) {
     //Ping-pong
     if (message.content.startsWith("ping")) {
         console.log("Ping-pong");
-        messageFlag = true;
-        message.channel.send("pong!").then(unused => {
-            finished = true;
-        });
+        message.channel.send("pong!");
         console.log(message.channel.id);
+        return true;
     }
+    else return false;
+}
 
+function err(message) {
+    if (message.content === prefix + "err") {
+        console.log("error throwing");
+        message.channel.send("hecc").then(unused => {
+            throw new Error;       
+        }).catch(e => {
+            throw e;
+        });
+        return true;
+    }
+    else return false;
+}
+
+function addResponse(message) {
     //Add keywords
     //Ideal syntax: !AddResponse Keyword Response
     //Rethink sterilization: eval function?
     if(message.content.toLowerCase().startsWith((prefix + "addresponse"))) {
         console.log("addResponse");
-        messageFlag = true;
         try {
             var stringArr = message.content.split(" ");
             var duplicate = false;
@@ -227,9 +252,7 @@ client.on("message", (message) => {
             {
                 duplicate=true;
                 console.log("Duplicate detected!");
-                message.channel.send("Cannot add response: Keyword is already a command").then(unused => {
-                    finished = true;
-                });
+                message.channel.send("Cannot add response: Keyword is already a command");
             }
         });
 
@@ -237,9 +260,7 @@ client.on("message", (message) => {
         {
             keywordJSON[keyword] =  {'Response': response }
             keywordArr.push(keyword.toString());
-            message.channel.send("Added Response!").then(unused => {
-                finished = true;
-            });
+            message.channel.send("Added Response!");
         }
 
         console.log(keywordJSON);
@@ -251,34 +272,25 @@ client.on("message", (message) => {
             if (error == TypeError )
             {
                 console.log(error);
-                message.channel.send("Cannot add response: There might have been a syntax error").then(unused => {
-                    finished = true;
-                });
+                message.channel.send("Cannot add response: There might have been a syntax error");
             }
         }
-        
+        return true;
     }
+    else return false;
+}
 
+function replytoXinxinsBot(message) {
     //Reply to Xinxin's bot
     if (message.content === "https://www.youtube.com/watch?v=vxKBHX9Datw" && message.author.id == "617473101852180488") {
         console.log("Reply to Xinxin's bot");
-        messageFlag = true;
-        message.channel.send ("<@617473101852180488> SHTAAAAALP PLZZZZZ ").then(unused => {
-            finished = true;
-        });
+        message.channel.send ("<@617473101852180488> SHTAAAAALP PLZZZZZ ");
+        return true;
     }
+    else return false;
+}
 
-    if (message.content === prefix + "err") {
-        console.log("error throwing");
-        messageFlag = true;
-        finished = true;
-        message.channel.send("hecc").then(unused => {
-            throw new Error;       
-        }).catch(e => {
-            throw e;
-        });
-    }
-
+function shutdown(message) {
     //Shutdown command
     if(message.content === "shutdown" && message.author.id == '282571468393414667') {
         console.log("Shutdown");
@@ -291,36 +303,32 @@ client.on("message", (message) => {
             process.exit();
         })
         );
+        return true;
     }
+    else return false;
+}
 
+function keywordResponse(message) {
     //Return keywords (should be last always!)
-    if (!messageFlag) {
-        console.log("Keyword Response");
-        var BreakException = {};
-        var resultArr = [];
-        var distanceArr = [];
-        try
-        {
-            keywordArr.forEach(element => {
-                if (message.content.startsWith('!' + element) && !message.author.bot) {
-                    //console.log(keywordJSON[element].Response);
-                    resultArr.push(element);
-                    //message.channel.send(keywordJSON[element].Response);
+    console.log("Keyword Response");
+    var BreakException = {};
+    var resultArr = [];
+    var distanceArr = [];
+    try {
+        keywordArr.forEach(element => {
+            if (message.content.startsWith('!' + element) && !message.author.bot) {
+                resultArr.push(element);
                 }
             });
 
             if (resultArr.length == 1) {
                 console.log(keywordJSON[resultArr[0]].Response);
-                message.channel.send(keywordJSON[resultArr[0]].Response).then(unused => {
-                    finished = true;
-                });
+                message.channel.send(keywordJSON[resultArr[0]].Response)
             }
-
             else if (resultArr.length > 1) {
                 for (var i=0; i < resultArr.length; i++) {
                     distanceArr[i] = leven.get(message.content, resultArr[i])
                 }
-
                 var lowestIndex = 0;
                 for (var i=0; i< distanceArr.length; i++) {
                     if (distanceArr[i] < lowestIndex) {
@@ -328,49 +336,13 @@ client.on("message", (message) => {
                     }
                 }
                 console.log(keywordJSON[resultArr[lowestIndex]].Response);
-                message.channel.send(keywordJSON[resultArr[lowestIndex]].Response).then(unused => 
-                    finished = true);
+                message.channel.send(keywordJSON[resultArr[lowestIndex]].Response);
             }
         }
         catch (e) {
             if (e !== BreakException) throw e;
-            finished = true;
         }
     }
-    if (finished) {
-        console.timeLog("message");
-        console.timeEnd("message");
-    }
-    
-});
-
-function help() {
-
-}
-
-function whoareyou() {
-
-}
-
-function snowflakeDecode() {
-
-}
-
-function vcJoinTest() {
-
-}
-
-function vcPlayTest() {
-
-}
-
-function toConsole() {
-
-}
-
-function id() {
-
-}
 
 decToBi = function(n) {
     var binary = parseInt(n, 10);
