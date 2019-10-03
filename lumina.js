@@ -30,13 +30,13 @@ var keywordJSON = {
 //Loop through all the stuff in the keyword json and add the name to an array
 var i = 0;
 var keywordArr = [];
-console.log(keywordJSON);
+//console.log(keywordJSON);
 //console.log(keywordJSON.nani.Keyword);
-for (obj in keywordJSON)
+/*for (obj in keywordJSON)
 {
     keywordArr.push(obj); 
 }
-console.log(keywordArr);
+console.log(keywordArr); */
 
 client.on("ready", () => {
     console.log("ready");
@@ -48,10 +48,17 @@ client.on("ready", () => {
 
 //VERY LARGE Message Processing Function
 client.on("message", (message) => {
+    //var event = new Event('messageSend');
     console.time("message");
     if (message.author.bot) return;
     var messageFlag = false;
     var finished = false;
+    const defaultCommands = new Promise(function(resolve, reject) {
+        if (message.content.startsWith(prefix + "help")) {
+            help();
+        }
+        
+    })
     //if (!message.content.startsWith(prefix)) return;
 
     if (message.content.startsWith(prefix + "help")) {
@@ -74,7 +81,6 @@ client.on("message", (message) => {
                 + "\n!addresponse: adds the first parameter as a keyword, adds the second parameter as a response (because I'm lazy and used string.split(\" \"), only one word per response and keyword can be used"
                 + "\n![keyword]: returns the response parameter");
             });
-        
         });
     }
     //Who are You
@@ -266,7 +272,11 @@ client.on("message", (message) => {
         console.log("error throwing");
         messageFlag = true;
         finished = true;
-        throw new Error;       
+        message.channel.send("hecc").then(unused => {
+            throw new Error;       
+        }).catch(e => {
+            throw e;
+        });
     }
 
     //Shutdown command
@@ -333,6 +343,34 @@ client.on("message", (message) => {
     }
     
 });
+
+function help() {
+
+}
+
+function whoareyou() {
+
+}
+
+function snowflakeDecode() {
+
+}
+
+function vcJoinTest() {
+
+}
+
+function vcPlayTest() {
+
+}
+
+function toConsole() {
+
+}
+
+function id() {
+
+}
 
 decToBi = function(n) {
     var binary = parseInt(n, 10);
