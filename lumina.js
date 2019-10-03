@@ -211,7 +211,7 @@ function whoami(message) {
 
 function ping(message) {
     //Ping-pong
-    if (message.content.startsWith("ping")) {
+    if (message.content.startsWith("!ping")) {
         console.log("Ping-pong");
         message.channel.send("pong!");
         console.log(message.channel.id);
