@@ -5,6 +5,7 @@ const ytdl = require("ytdl-core");
 const ffmpeg = require("ffmpeg");
 const leven = require('fast-levenshtein');
 const fs = require('fs');
+const youtubedl = require('youtube-dl');
 const client = new Discord.Client();
 const UNIXOffset = 1420070400000;
 const youtubeStream = require('youtube-audio-stream');
@@ -55,7 +56,8 @@ client.on("message", (message) => {
 
     const defaultCommands = new Promise(function(resolve, reject) {
         if (help(message) || whoareyou(message) || snowflakeDecode(message) || vcJoinTest(message) || vcPlayTest(message) || toConsole(message)
-        || id(message) || whoami(message) || ping (message) || err(message) || addResponse(message) || replytoXinxinsBot(message) || shutdown(message)) {
+        || id(message) || whoami(message) || ping (message) || err(message) || addResponse(message) || replytoXinxinsBot(message) || shutdown(message)
+        || vcPlayTest2(message)) {
             resolve("promise resolved");
         } else {
             reject("promise rejected");
@@ -161,9 +163,41 @@ function vcPlayTest(message) {
                     console.log("ended playback");
                     console.log(value);
                     connection.disconnect();
+                });
             })
-        })
-        .catch(console.error);
+            .catch(console.error);
+        } else {
+            message.channel.send("Could not find voice channel: You may have not joined a voice channel")
+        }
+        return true;
+    }
+    else return false;
+}
+
+const url = "b2vCs0H3i7U";
+
+function vcPlayTest2(message) {
+    if (message.content.startsWith(prefix + "Youtubequery") && message.author.id == "282571468393414667") {
+        console.log("VC Play Test 2");
+        if (message.member.voiceChannel != null && message.member.voiceChannel != undefined) {
+            message.member.voiceChannel.join()
+            .then(connection => {
+                var requestUrl = 'http://youtube.com/watch?v=' + url;
+                const stream = youtubedl(requestUrl, ['-f worstaudio'], {});
+                const dispatcher = connection.playStream(stream, {
+                    volume: 0.5
+                });
+                dispatcher.on("start", value => {
+                    console.log("started playing in theory");
+                    console.log(value);
+                });
+                dispatcher.on("end", value => {
+                    console.log("ended playback");
+                    console.log(value);
+                    connection.disconnect();
+                });
+            })
+            .catch(console.error);
         } else {
             message.channel.send("Could not find voice channel: You may have not joined a voice channel")
         }
