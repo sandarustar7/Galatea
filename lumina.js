@@ -1,11 +1,11 @@
 const Discord = require("discord.js");
 const SnowflakeUtil = Discord.SnowflakeUtil;
 const clientSecret = require("./secret.json");
-const ytdl = require("ytdl-core");
 const ffmpeg = require("ffmpeg");
 const leven = require('fast-levenshtein');
 const fs = require('fs');
 const youtubedl = require('youtube-dl');
+const ytdl = require('ytdl-core');
 const client = new Discord.Client();
 const UNIXOffset = 1420070400000;
 const youtubeStream = require('youtube-audio-stream');
@@ -183,19 +183,29 @@ function vcPlayTest2(message) {
             message.member.voiceChannel.join()
             .then(connection => {
                 var requestUrl = 'http://youtube.com/watch?v=' + url;
-                const stream = youtubedl(requestUrl, ['-f worstaudio'], {});
-                const dispatcher = connection.playStream(stream, {
-                    volume: 0.5
-                });
-                dispatcher.on("start", value => {
-                    console.log("started playing in theory");
-                    console.log(value);
-                });
-                dispatcher.on("end", value => {
-                    console.log("ended playback");
-                    console.log(value);
-                    connection.disconnect();
-                });
+                /*const readableStream = ytdl(requestUrl, {
+                    filter: 'audioonly',
+                }); */
+                var stream = youtubedl(requestUrl, ['-x', '--audio-format', 'mp3'], {});
+                stream.pipe(fs.createWriteStream('temp.mp3'));
+                stream.on('end', function end () {
+                    const dispatcher = connection.playFile('temp.mp3', {
+                        volume: 0.15
+                    });
+                    dispatcher.on("start", value => {
+                        console.log("started playing in theory");
+                        console.log(value);
+                    });
+                    dispatcher.on("end", value => {
+                        console.log("ended playback");
+                        console.log(value);
+                        connection.disconnect();
+                    });
+                })
+                //const dispatcher = connection.playStream(readableStream, {
+                //    volume: 0.5
+                //});
+                
             })
             .catch(console.error);
         } else {
