@@ -1,1 +1,1 @@
-forever start lumina.js -w
+forever start lumina.js -w --workingDir "E:\3xperimental\Discord\Galatea"

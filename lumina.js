@@ -1,16 +1,25 @@
 const Discord = require("discord.js");
 const SnowflakeUtil = Discord.SnowflakeUtil;
 const clientSecret = require("./secret.json");
+
 const ffmpeg = require("ffmpeg");
 const leven = require('fast-levenshtein');
 const fs = require('fs');
 const youtubedl = require('youtube-dl');
 const ytdl = require('ytdl-core');
-const client = new Discord.Client();
-const UNIXOffset = 1420070400000;
 const youtubeStream = require('youtube-audio-stream');
 const forever = require("forever-monitor");
+const textToSpeech = require('@google-cloud/text-to-speech');
+const util = require('util');
+
+const keyFile = "./serviceAccount.json";
+const projectId = 'discordtts-262305';
+const ttsClient = new textToSpeech.TextToSpeechClient({projectId, keyFile});
 //const api = require('twitch-api-v5');
+
+const client = new Discord.Client();
+const UNIXOffset = 1420070400000;
+
 const clientActivity = {
     'name' : ' with the universe',
     'options.type' : 'PLAYING'
@@ -57,7 +66,7 @@ client.on("message", (message) => {
     const defaultCommands = new Promise(function(resolve, reject) {
         if (help(message) || whoareyou(message) || snowflakeDecode(message) || vcJoinTest(message) || vcPlayTest(message) || toConsole(message)
         || id(message) || whoami(message) || ping (message) || err(message) || addResponse(message) || replytoXinxinsBot(message) || shutdown(message)
-        || vcPlayTest2(message)) {
+        || vcPlayTest2(message) || Wavenet(message)) {
             resolve("promise resolved");
         } else {
             reject("promise rejected");
@@ -390,7 +399,33 @@ function keywordResponse(message) {
         catch (e) {
             if (e !== BreakException) throw e;
         }
-    }
+}
+
+async function Wavenet(message) {
+    console.log("wavenet");
+    if (message.content.toLowerCase().startsWith((prefix + "speech"))) {
+        var content = message.content.split(" ");
+        //var snowflake = SnowflakeUtil.deconstruct(content[1]);
+        //console.log(snowflake.date);
+        var text = content.slice(1).join(" ");
+        const request = {
+            input : {text: text},
+            voice: {languageCode: 'en-US', ssmlGender: 'NEUTRAL'},
+            audioConfig: {audioEncoding: 'MP3'},
+        };
+        const [response] = await ttsClient.synthesizeSpeech(request);
+        const writeFile = util.promisify(fs.writeFile);
+        await writeFile('output.mp3', response.audioContent, 'binary');
+        console.log("Written hopefully");
+        message.channel.send({
+            files: [{
+                attachment: 'output.mp3',
+                name: 'TTS.mp3'
+            }] 
+        });
+        return true;
+    } else return false;
+}
 
 decToBi = function(n) {
     var binary = parseInt(n, 10);
@@ -415,3 +450,4 @@ function asyncTimeout(ms) {
     console.log("uncaughtException: Client destroyed successfully");
     throw err;
   })*/
+
