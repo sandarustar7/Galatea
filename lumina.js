@@ -31,10 +31,6 @@ var prefix = '!';
 var keywordJSON = {
     "nani" : {
         "Response": "insert text here"  
-    },
-    
-    "pneuma" : {
-        "Response": "Coffee with Milk????"
     }
 }
 //Loop through all the stuff in the keyword json and add the name to an array
@@ -52,12 +48,19 @@ client.on("ready", () => {
     console.log("ready");
     client.user.setActivity(clientActivity.name, clientActivity["options.type"]).then( value => 
         console.log("Presence set!")); 
-    client.channels.get('619406405685870593').send('Ready and listening!');
+    //client.channels.get('619406405685870593').send('Ready and listening!');
+    banhammer = client.emojis.get("659205334900146199");
+    console.log(client.emojis.get("659205334900146199").name);
+    hammerfilter = (reaction, user) => {
+        return (reaction.emoji.name === banhammer.name && !user.bot);
+        //return true;
+    }
 });
-
 
 //VERY LARGE Message Processing Function
 client.on("message", (message) => {
+    var action = false;
+    const date = new Date();
     const time = process.hrtime();
     console.log("______NEW MESSAGE_______");
     var diff;
@@ -66,24 +69,31 @@ client.on("message", (message) => {
     const defaultCommands = new Promise(function(resolve, reject) {
         if (help(message) || whoareyou(message) || snowflakeDecode(message) || vcJoinTest(message) || vcPlayTest(message) || toConsole(message)
         || id(message) || whoami(message) || ping (message) || err(message) || addResponse(message) || replytoXinxinsBot(message) || shutdown(message)
-        || vcPlayTest2(message) || Wavenet(message)) {
-            resolve("promise resolved");
+        || vcPlayTest2(message) || wavenet(message) || emojiId(message)) {
+            action = true;
+            resolve(true);
         } else {
-            reject("promise rejected");
+            resolve(false);
         }
-        
     });
 
     defaultCommands.then(value => {
-        console.log(value);
-        return true;
+        if (value === true) {
+            console.log("function found");
+        } else if (value === false) {
+            console.log("function not found");
+            if (keywordResponse(message)) {
+                console.log("Keyword Response");
+            }
+        }
+        banhammers(message, date);
+        diff = process.hrtime(time);
+        console.log(diff[1]/1000000 + "ms @ " + date.toTimeString());
     })
-    .catch(value => {
-        console.log(value);
-        keywordResponse(message);
+    .catch(error => {
+        console.log(error);
+        throw error;
     })
-    .finally(diff = process.hrtime(time));
-    console.log(diff[1]/1000000 + "ms");
 });
 
 function help (message) {
@@ -119,6 +129,7 @@ function whoareyou(message) {
         console.log("who are you");
         message.channel.send(client.user.id);
     }
+    return false;
 }
 
 function snowflakeDecode(message) {
@@ -367,7 +378,6 @@ function shutdown(message) {
 
 function keywordResponse(message) {
     //Return keywords (should be last always!)
-    console.log("Keyword Response");
     var BreakException = {};
     var resultArr = [];
     var distanceArr = [];
@@ -381,6 +391,7 @@ function keywordResponse(message) {
             if (resultArr.length == 1) {
                 console.log(keywordJSON[resultArr[0]].Response);
                 message.channel.send(keywordJSON[resultArr[0]].Response)
+                return true;
             }
             else if (resultArr.length > 1) {
                 for (var i=0; i < resultArr.length; i++) {
@@ -394,6 +405,7 @@ function keywordResponse(message) {
                 }
                 console.log(keywordJSON[resultArr[lowestIndex]].Response);
                 message.channel.send(keywordJSON[resultArr[lowestIndex]].Response);
+                return true;
             }
         }
         catch (e) {
@@ -401,10 +413,17 @@ function keywordResponse(message) {
         }
 }
 
-async function Wavenet(message) {
-    console.log("wavenet");
+function wavenet(message) {
     if (message.content.toLowerCase().startsWith((prefix + "speech"))) {
-        var content = message.content.split(" ");
+        console.log("wavenet");
+        message.channel.send("Processing...").then(statusMessage => {
+            wavenetProcessing(message, statusMessage);
+        });
+        return true;
+    } else return false;
+}
+async function wavenetProcessing(message, statusMessage) {
+    var content = message.content.split(" ");
         //var snowflake = SnowflakeUtil.deconstruct(content[1]);
         //console.log(snowflake.date);
         var text = content.slice(1).join(" ");
@@ -413,18 +432,55 @@ async function Wavenet(message) {
             voice: {languageCode: 'en-US', ssmlGender: 'NEUTRAL'},
             audioConfig: {audioEncoding: 'MP3'},
         };
-        const [response] = await ttsClient.synthesizeSpeech(request);
-        const writeFile = util.promisify(fs.writeFile);
-        await writeFile('output.mp3', response.audioContent, 'binary');
-        console.log("Written hopefully");
-        message.channel.send({
-            files: [{
-                attachment: 'output.mp3',
-                name: 'TTS.mp3'
-            }] 
-        });
+        try {
+            const [response] = await ttsClient.synthesizeSpeech(request);
+            const writeFile = util.promisify(fs.writeFile);
+            await writeFile('output.mp3', response.audioContent, 'binary');
+            //console.log("Written hopefully");
+            message.channel.send({
+                files: [{
+                    attachment: 'output.mp3',
+                    name: 'TTS.mp3'
+                }] 
+            });
+        } catch (e) {
+            if (e.message === "8 RESOURCE_EXHAUSTED: Resource has been exhausted (e.g. check quota).") {
+                message.channel.send("Quota exhausted! Please wait a minute before sending");
+            } else {
+                throw e;
+            }
+        }
+        finally {
+            statusMessage.delete();
+        }
+}
+
+function emojiId(message) {
+    if (message.content.startsWith(prefix + "emoji")) {
+        console.log("emoji");
+        var text = message.content.split(" ");
+        console.log(text[1]);
+        //message.channel.send(text[1]);
+        //message.channel.send(client.emojis.get("659205334900146199").toString());
         return true;
-    } else return false;
+    }
+    return false;
+}
+
+var banhammer;
+
+var hammerfilter;
+
+function banhammers(message, time) {
+    const collector = message.createReactionCollector(hammerfilter, {time: 600000});
+
+    collector.on('collect', (reaction, reactionCollector) => {
+        console.log('Collected ' + reaction.emoji.name + ' at ' + ((new Date).toTimeString()) + ' for message at: ' + time.toTimeString());
+    })
+
+    collector.on('end', collected => {
+        console.log('Collected ' + collected.size + ' reaction(s) for message at: ' + time.toTimeString());
+    });
 }
 
 decToBi = function(n) {
