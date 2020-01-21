@@ -9,12 +9,12 @@ const youtubedl = require('youtube-dl');
 const ytdl = require('ytdl-core');
 const youtubeStream = require('youtube-audio-stream');
 const forever = require("forever-monitor");
-const textToSpeech = require('@google-cloud/text-to-speech');
+const ttscloud = require('@google-cloud/text-to-speech');
 const util = require('util');
 
 const keyFile = "./serviceAccount.json";
 const projectId = 'discordtts-262305';
-const ttsClient = new textToSpeech.TextToSpeechClient({projectId, keyFile});
+const ttsClient = new ttscloud.TextToSpeechClient({projectId, keyFile});
 //const api = require('twitch-api-v5');
 
 const client = new Discord.Client();
@@ -69,7 +69,8 @@ client.on("message", (message) => {
     const defaultCommands = new Promise(function(resolve, reject) {
         if (help(message) || whoareyou(message) || snowflakeDecode(message) || vcJoinTest(message) || vcPlayTest(message) || toConsole(message)
         || id(message) || whoami(message) || ping (message) || err(message) || addResponse(message) || replytoXinxinsBot(message) || shutdown(message)
-        || vcPlayTest2(message) || wavenet(message) || emojiId(message)) {
+        || vcPlayTest2(message) || textToSpeech(message) || emojiId(message) || cheese(message)
+        || wavenet(message)) {
             action = true;
             resolve(true);
         } else {
@@ -114,6 +115,7 @@ function help (message) {
                 + "\n!whoami: responds with message author's id"
                 + "\n!ping: responds with pong"
                 + "\n!err: throws error"
+                + "\n new commands may have not been added yet, please ask combatperson for clarification"
                 + "\n!addresponse: adds the first parameter as a keyword, adds the second parameter as a response (because I'm lazy and used string.split(\" \"), only one word per response and keyword can be used"
                 + "\n![keyword]: returns the response parameter");
             });
@@ -413,19 +415,17 @@ function keywordResponse(message) {
         }
 }
 
-function wavenet(message) {
+function textToSpeech(message) {
     if (message.content.toLowerCase().startsWith((prefix + "speech"))) {
-        console.log("wavenet");
-        message.channel.send("Processing...").then(statusMessage => {
-            wavenetProcessing(message, statusMessage);
+        console.log("tts");
+        message.channel.send("Processing TTS...").then(statusMessage => {
+            ttsProcessing(message, statusMessage);
         });
         return true;
     } else return false;
 }
-async function wavenetProcessing(message, statusMessage) {
+async function ttsProcessing(message, statusMessage) {
     var content = message.content.split(" ");
-        //var snowflake = SnowflakeUtil.deconstruct(content[1]);
-        //console.log(snowflake.date);
         var text = content.slice(1).join(" ");
         const request = {
             input : {text: text},
@@ -436,11 +436,62 @@ async function wavenetProcessing(message, statusMessage) {
             const [response] = await ttsClient.synthesizeSpeech(request);
             const writeFile = util.promisify(fs.writeFile);
             await writeFile('output.mp3', response.audioContent, 'binary');
-            //console.log("Written hopefully");
             message.channel.send({
                 files: [{
                     attachment: 'output.mp3',
                     name: 'TTS.mp3'
+                }] 
+            });
+        } catch (e) {
+            if (e.message === "8 RESOURCE_EXHAUSTED: Resource has been exhausted (e.g. check quota).") {
+                message.channel.send("Quota exhausted! Please wait a minute before sending");
+            } else {
+                throw e;
+            }
+        }
+        finally {
+            statusMessage.delete();
+        }
+}
+
+async function listENVoices(message) {
+    console.log(await ttsClient.listVoices(
+        {
+        languageCode: "en"
+    }
+    ));
+}
+
+function wavenet(message) {
+    if (message.content.startsWith((prefix + "wavenet"))) {
+        if (message.author.id == '282571468393414667') {
+            console.log("tts");
+            message.channel.send("Processing Wavenet...").then(statusMessage => {
+                wavenetProcessing(message, statusMessage);
+            });
+            return true;
+        }
+        message.channel.send("Unauthorized. Try using the tts command instead");
+    }
+    return false;
+}
+
+async function wavenetProcessing(message, statusMessage) {
+    var content = message.content.split(" ");
+        var text = content.slice(1).join(" ");
+        const request = {
+            input : {text: text},
+            voice: {languageCode: 'en-US', voice: "en-US-Wavenet-A", ssmlGender: 'NEUTRAL'},
+            audioConfig: {audioEncoding: 'MP3'},
+        };
+        try {
+            const [response] = await ttsClient.synthesizeSpeech(request);
+            const writeFile = util.promisify(fs.writeFile);
+            await writeFile('wavenet.mp3', response.audioContent, 'binary');
+            message.channel.send({
+                files: [{
+                    attachment: 'wavenet.mp3',
+                    name: 'wavenet.mp3'
                 }] 
             });
         } catch (e) {
@@ -483,6 +534,14 @@ function banhammers(message, time) {
     });
 }
 
+
+function cheese(message) {
+    if (message.content.toLowerCase().startsWith((prefix + "cheese"))) {
+        message.channel.send(":notes: I'm on the moon... It's made of cheese... :notes:");
+        return true;
+    }
+    return false;
+}
 decToBi = function(n) {
     var binary = parseInt(n, 10);
     return binary.toString(2);
