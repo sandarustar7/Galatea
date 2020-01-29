@@ -64,11 +64,11 @@ client.on("message", (message) => {
     const time = process.hrtime();
     console.log("______NEW MESSAGE_______");
     var diff;
-    if (message.author.bot) return;
+    if (replytoXinxinsBot(message) || message.author.bot) return;
 
     const defaultCommands = new Promise(function(resolve, reject) {
         if (help(message) || whoareyou(message) || snowflakeDecode(message) || vcJoinTest(message) || vcPlayTest(message) || toConsole(message)
-        || id(message) || whoami(message) || ping (message) || err(message) || addResponse(message) || replytoXinxinsBot(message) || shutdown(message)
+        || id(message) || whoami(message) || ping (message) || err(message) || addResponse(message) || shutdown(message)
         || vcPlayTest2(message) || textToSpeech(message) || emojiId(message) || cheese(message)
         || wavenet(message)) {
             action = true;
