@@ -354,6 +354,7 @@ function addResponse(message) {
 
 function replytoXinxinsBot(message) {
     //Reply to Xinxin's bot
+    console.log(message.content);
     if (message.content === "https://www.youtube.com/watch?v=vxKBHX9Datw" && message.author.id == "617473101852180488") {
         console.log("Reply to Xinxin's bot");
         message.channel.send ("<@617473101852180488> SHTAAAAALP PLZZZZZ ");
@@ -364,7 +365,7 @@ function replytoXinxinsBot(message) {
 
 function shutdown(message) {
     //Shutdown command
-    if(message.content === "shutdown" && message.author.id == '282571468393414667') {
+    if(message.content === "shutdown" && message.author.id === '282571468393414667') {
         console.log("Shutdown");
         client.channels.get('619406405685870593').send('Going offline...')
         .then(value => 
