@@ -59,7 +59,7 @@ client.on("ready", () => {
 
 //VERY LARGE Message Processing Function
 client.on("message", (message) => {
-    var action = false;
+    let action = false;
     const date = new Date();
     const time = process.hrtime();
     console.log("______NEW MESSAGE_______");
@@ -199,7 +199,7 @@ function vcPlayTest(message) {
 const url = "b2vCs0H3i7U";
 
 function vcPlayTest2(message) {
-    if (message.content.startsWith(prefix + "Youtubequery") && message.author.id == "282571468393414667") {
+    if (message.content.startsWith(prefix + "Youtubequery") && message.author.id === "282571468393414667") {
         console.log("VC Play Test 2");
         if (message.member.voiceChannel != null && message.member.voiceChannel != undefined) {
             message.member.voiceChannel.join()
@@ -320,7 +320,7 @@ function addResponse(message) {
             }
             keywordArr.forEach(element => {
             console.log(element);
-            if (stringArr[1] == element)
+            if (stringArr[1] === element)
             {
                 duplicate=true;
                 console.log("Duplicate detected!");
@@ -341,7 +341,7 @@ function addResponse(message) {
             console.log(element);
         });
         } catch (error) {
-            if (error == TypeError )
+            if (error === TypeError )
             {
                 console.log(error);
                 message.channel.send("Cannot add response: There might have been a syntax error");
@@ -354,7 +354,7 @@ function addResponse(message) {
 
 function replytoXinxinsBot(message) {
     //Reply to Xinxin's bot
-    if (message.content === "https://www.youtube.com/watch?v=vxKBHX9Datw" && message.author.id == "617473101852180488") {
+    if (message.content === "https://www.youtube.com/watch?v=vxKBHX9Datw" && message.author.id === "617473101852180488") {
         console.log("Reply to Xinxin's bot");
         message.channel.send ("<@617473101852180488> SHTAAAAALP PLZZZZZ ");
         return true;
@@ -390,9 +390,9 @@ function keywordResponse(message) {
                 }
             });
 
-            if (resultArr.length == 1) {
+            if (resultArr.length === 1) {
                 console.log(keywordJSON[resultArr[0]].Response);
-                message.channel.send(keywordJSON[resultArr[0]].Response)
+                message.channel.send(keywordJSON[resultArr[0]].Response);
                 return true;
             }
             else if (resultArr.length > 1) {
@@ -464,7 +464,7 @@ async function listENVoices(message) {
 
 function wavenet(message) {
     if (message.content.startsWith((prefix + "wavenet"))) {
-        if (message.author.id == '282571468393414667') {
+        if (message.author.id === '282571468393414667') {
             console.log("tts");
             message.channel.send("Processing Wavenet...").then(statusMessage => {
                 wavenetProcessing(message, statusMessage);
