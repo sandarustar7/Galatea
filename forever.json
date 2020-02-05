@@ -2,7 +2,6 @@
     "uid" : "Galatea",
     "append" : true,
     "spinSleepTime" : 1000,
-    "watch" : true,
     "script" : "lumina.js",
     "sourceDir" : "/root/Galatea/"
 }
