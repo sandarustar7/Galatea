@@ -8,7 +8,6 @@ const fs = require('fs');
 const youtubedl = require('youtube-dl');
 const ytdl = require('ytdl-core');
 const youtubeStream = require('youtube-audio-stream');
-const forever = require("forever-monitor");
 const ttscloud = require('@google-cloud/text-to-speech');
 const util = require('util');
 
