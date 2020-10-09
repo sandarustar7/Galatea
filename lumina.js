@@ -25,13 +25,13 @@ const clientActivity = {
 }
 var prefix = '!';
 
-
 //var keywordJSON = JSON.parse(fs.readFileSync('keyword.json').toString());
 var keywordJSON = {
     "nani" : {
         "Response": "insert text here"  
     }
 }
+
 //Loop through all the stuff in the keyword json and add the name to an array
 var i = 0;
 var keywordArr = [];
@@ -68,8 +68,7 @@ client.on("message", (message) => {
     const defaultCommands = new Promise(function(resolve, reject) {
         if (help(message) || whoareyou(message) || snowflakeDecode(message) || vcJoinTest(message) || vcPlayTest(message) || toConsole(message)
         || id(message) || whoami(message) || ping (message) || err(message) || addResponse(message) || shutdown(message)
-        || vcPlayTest2(message) || textToSpeech(message) || emojiId(message) || cheese(message)
-        || wavenet(message)) {
+        || vcPlayTest2(message) || emojiId(message) || cheese(message) || thiccass(message)) {
             action = true;
             resolve(true);
         } else {
@@ -195,22 +194,19 @@ function vcPlayTest(message) {
     else return false;
 }
 
-const url = "b2vCs0H3i7U";
+const url = "dQw4w9WgXcQ";
 
 function vcPlayTest2(message) {
-    if (message.content.startsWith(prefix + "Youtubequery") && message.author.id === "282571468393414667") {
+    if (message.content.startsWith(prefix + "YoutubeTest") && message.author.id === "282571468393414667") {
         console.log("VC Play Test 2");
         if (message.member.voiceChannel != null && message.member.voiceChannel != undefined) {
             message.member.voiceChannel.join()
             .then(connection => {
-                var requestUrl = 'http://youtube.com/watch?v=' + url;
-                /*const readableStream = ytdl(requestUrl, {
-                    filter: 'audioonly',
-                }); */
-                var stream = youtubedl(requestUrl, ['-x', '--audio-format', 'mp3'], {});
-                stream.pipe(fs.createWriteStream('temp.mp3'));
-                stream.on('end', function end () {
-                    const dispatcher = connection.playFile('temp.mp3', {
+                //var requestUrl = 'http://youtube.com/watch?v=' + url;
+                //var stream = ytdl(requestUrl)
+                //stream.pipe(fs.createWriteStream('temp.mp3'));
+                //stream.on('end', function end () {
+                    const dispatcher = connection.playFile('rickroll.mp3', {
                         volume: 0.15
                     });
                     dispatcher.on("start", value => {
@@ -227,7 +223,7 @@ function vcPlayTest2(message) {
                 //    volume: 0.5
                 //});
                 
-            })
+            //})
             .catch(console.error);
         } else {
             message.channel.send("Could not find voice channel: You may have not joined a voice channel")
@@ -414,97 +410,6 @@ function keywordResponse(message) {
         }
 }
 
-function textToSpeech(message) {
-    if (message.content.toLowerCase().startsWith((prefix + "speech"))) {
-        console.log("tts");
-        message.channel.send("Processing TTS...").then(statusMessage => {
-            ttsProcessing(message, statusMessage);
-        });
-        return true;
-    } else return false;
-}
-async function ttsProcessing(message, statusMessage) {
-    var content = message.content.split(" ");
-        var text = content.slice(1).join(" ");
-        const request = {
-            input : {text: text},
-            voice: {languageCode: 'en-US', ssmlGender: 'NEUTRAL'},
-            audioConfig: {audioEncoding: 'MP3'},
-        };
-        try {
-            const [response] = await ttsClient.synthesizeSpeech(request);
-            const writeFile = util.promisify(fs.writeFile);
-            await writeFile('output.mp3', response.audioContent, 'binary');
-            message.channel.send({
-                files: [{
-                    attachment: 'output.mp3',
-                    name: 'TTS.mp3'
-                }] 
-            });
-        } catch (e) {
-            if (e.message === "8 RESOURCE_EXHAUSTED: Resource has been exhausted (e.g. check quota).") {
-                message.channel.send("Quota exhausted! Please wait a minute before sending");
-            } else {
-                throw e;
-            }
-        }
-        finally {
-            statusMessage.delete();
-        }
-}
-
-async function listENVoices(message) {
-    console.log(await ttsClient.listVoices(
-        {
-        languageCode: "en"
-    }
-    ));
-}
-
-function wavenet(message) {
-    if (message.content.startsWith((prefix + "wavenet"))) {
-        if (message.author.id === '282571468393414667') {
-            console.log("tts");
-            message.channel.send("Processing Wavenet...").then(statusMessage => {
-                wavenetProcessing(message, statusMessage);
-            });
-            return true;
-        }
-        message.channel.send("Unauthorized. Try using the tts command instead");
-    }
-    return false;
-}
-
-async function wavenetProcessing(message, statusMessage) {
-    var content = message.content.split(" ");
-        var text = content.slice(1).join(" ");
-        const request = {
-            input : {text: text},
-            voice: {languageCode: 'en-US', voice: "en-US-Wavenet-A", ssmlGender: 'NEUTRAL'},
-            audioConfig: {audioEncoding: 'MP3'},
-        };
-        try {
-            const [response] = await ttsClient.synthesizeSpeech(request);
-            const writeFile = util.promisify(fs.writeFile);
-            await writeFile('wavenet.mp3', response.audioContent, 'binary');
-            message.channel.send({
-                files: [{
-                    attachment: 'wavenet.mp3',
-                    name: 'wavenet.mp3'
-                }] 
-            });
-        } catch (e) {
-            if (e.message === "8 RESOURCE_EXHAUSTED: Resource has been exhausted (e.g. check quota).") {
-                message.channel.send("Quota exhausted! Please wait a minute before sending");
-            } else {
-                throw e;
-            }
-        }
-        finally {
-            statusMessage.delete();
-        }
-}
-
 function emojiId(message) {
     if (message.content.startsWith(prefix + "emoji")) {
         console.log("emoji");
@@ -550,6 +455,12 @@ discordToUNIX = function(n) {
     var UNIX = parseInt(n, 2);
     UNIX += UNIXOffset;
     return UNIX;
+}
+
+function thiccass(message) {
+    if (message.content.toLowerCase().startsWith((prefix + "thiccass"))) {
+        client.channels.get("751176358369034332").send("Hello mr. Dandy, \n \n I wanted to let you know that your son has <@&751174073379192912>. \n \n From your son's dad, \n im my dad")
+    }
 }
 
 client.login(clientSecret.secret);
